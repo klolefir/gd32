@@ -38,7 +38,7 @@ typedef enum {
 	gpio_pin_12 = GPIO_PIN_12,
 	gpio_pin_13 = GPIO_PIN_13,
 	gpio_pin_14 = GPIO_PIN_14,
-	gpio_pin_15 = GPIO_PIN_15,
+	gpio_pin_15 = GPIO_PIN_15
 } gpio_pin_t;
 
 typedef enum {

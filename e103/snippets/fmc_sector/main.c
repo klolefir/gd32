@@ -8,25 +8,35 @@ static usart_t usart0;
 
 int main(void)
 {
-	init();
-
 	int i;
-	const uint32_t addr = fmc_page100_addr;
+	const uint32_t addr = fmc_page127_addr + 0x04;
 	const uint32_t data_size = 50;
 	uint32_t write_data[data_size];
 	uint32_t read_data[data_size];
+	fmc_state_t fmc_state;
+
+	init();
 
 	for(i = 0; i < data_size; i++)
-		write_data[i] = 0xDEADBEEF;
+		write_data[i] = 0x12345678;
 
 	fmc_unlock();
 
-	for(i = 0; i < (data_size * fmc_word_size); i++) {
-		if(!(i % fmc_page_size))
-			fmc_page_erase(addr + i);
+	fmc_state = xfmc_erase_sector(addr, data_size * fmc_word_size);
+	if(fmc_state == fmc_bad_erase) {
+		xusart_put_str(&usart0, "BAD ERASE: \r");
+		goto bad;
 	}
-	fmc_write_sector(addr, write_data, data_size * fmc_word_size);
-	fmc_read_sector(addr, read_data, data_size * fmc_word_size);
+	fmc_state = xfmc_write_sector(addr, write_data, data_size * fmc_word_size);
+	if(fmc_state == fmc_bad_write) {
+		xusart_put_str(&usart0, "BAD WRITE: \r");
+		goto bad;
+	}
+	fmc_state = xfmc_read_sector(addr, read_data, data_size * fmc_word_size);
+	if(fmc_state == fmc_bad_read) {
+		xusart_put_str(&usart0, "BAD READ: \r");
+		goto bad;
+	}
 
 	xusart_put_str(&usart0, "READ DATA: \r");
 	for(i = 0; i < data_size; i++) {
@@ -34,8 +44,10 @@ int main(void)
 		xusart_put_char(&usart0, '\r');
 	}
 
+bad:
 	fmc_lock();
 
+	
 	while(1) {}
 
 	return 0;

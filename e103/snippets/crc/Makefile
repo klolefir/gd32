@@ -22,8 +22,7 @@ CMSIS_SOURCE = 	../../vendor/cmsis/gd32e10x/per/src/gd32e10x_rcu.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_misc.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_fmc.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_usart.c \
-				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_eval.c \
-				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_exti.c
+				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_crc.c
 PERLIB_SOURCE = ../../perlib/gpio.c \
 				../../perlib/systick.c \
 				../../perlib/usart.c

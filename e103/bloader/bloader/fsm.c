@@ -4,82 +4,82 @@
 #include "rcu.h"
 #include "usart.h"
 #include "tim.h"
+#include "bloader.h"
 #include "kestring.h"
 
 static void init();
-static recv_st_t receive(req_buff_t *req_buff_st);
-static void decode(const req_buff_t *req_buff_st, dec_buff_t *dec_buff_st);
-static handle_st_t handle(const dec_buff_t *dec_buff_st, ans_buff_t *ans_buff_st);
-static void respond(const ans_buff_t *ans_buff_st);
-static void purge(req_buff_t *req_buff_st, ans_buff_t *ans_buff_st);
+static recv_state_t receive(req_buff_t *req_buff_set);
+static decode_state_t decode(const req_buff_t *req_buff_set);
+static handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
+static void respond(const ans_buff_t *ans_buff_set);
+static void purge(req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
 static void reset();
 static void deinit();
 static void gomain();
-static void error(ans_buff_t *ans_buff_st);
+static void error(ans_buff_t *ans_buff_set);
 
-fsm_state_t switch_state_after_recv(const recv_st_t recv_status);
-fsm_state_t switch_state_after_handle(const handle_st_t handle_status);
+fsm_state_t switch_state_after_recv(const recv_state_t recv_status);
+fsm_state_t switch_state_after_decode(const decode_state_t decode_state);
+fsm_state_t switch_state_after_handle(const handle_state_t handle_stateatus);
 
 void fsm_process()
 {
-	req_buff_t req_buff_st;
-	req_buff_st.cnt = 0;
+	req_buff_t req_buff_set;
+	req_buff_set.cnt = 0;
 
-	dec_buff_t dec_buff_st;
-	dec_buff_st.cnt = 0;
+	ans_buff_t ans_buff_set;
+	ans_buff_set.cnt = 0;
 
-	ans_buff_t ans_buff_st;
-	ans_buff_st.cnt = 0;
+	recv_state_t 	recv_state;
+	decode_state_t	decode_state;
+	handle_state_t 	handle_state;
 
-	recv_st_t 	recv_st;
-	handle_st_t handle_st;
-
-	fsm_state_t state = idle_state;
+	fsm_state_t state = fsm_idle_state;
 	while(1) {
 		switch(state) {
 
-		case idle_state:		state = init_state;
+		case fsm_idle_state:	state = fsm_init_state;
 								break;
 
-		case init_state:		init();
-								state = wait_state;
+		case fsm_init_state:	init();
+								state = fsm_wait_state;
 								break;
 
-		case wait_state:		state = receive_state;
+		case fsm_wait_state:	state = fsm_receive_state;
 								break;
 
-		case receive_state:		recv_st = receive(&req_buff_st);
-								state = switch_state_after_recv(recv_st);
+		case fsm_receive_state:	recv_state = receive(&req_buff_set);
+								state = switch_state_after_recv(recv_state);
 								break;
 
-		case decode_state:		decode(&req_buff_st, &dec_buff_st);
-								state = handle_state;
+		case fsm_decode_state:	decode_state = decode(&req_buff_set);
+								state = switch_state_after_decode(decode_state);
 								break;
 
-		case handle_state:		handle_st = handle(&dec_buff_st, &ans_buff_st);
-								state = switch_state_after_handle(handle_st);
+		case fsm_handle_state:	handle_state= handle(&req_buff_set, &ans_buff_set);
+								state = switch_state_after_handle(handle_state);
 								break;
 
-		case error_state:		error(&ans_buff_st);
-								state = respond_state;
+		case fsm_error_state:	error(&ans_buff_set);
+								state = fsm_respond_state;
 								break;
 
-		case respond_state:		respond(&ans_buff_st);
-								state = purge_state;
+		case fsm_respond_state:	respond(&ans_buff_set);
+								state = fsm_purge_state;
 								break;
 
-		case purge_state:		purge(&req_buff_st, &ans_buff_st);
-								state = receive_state;
+		case fsm_purge_state:	purge(&req_buff_set, &ans_buff_set);
+								state = fsm_receive_state;
 								break;
 
-		case deinit_state:		deinit();
-								state = gomain_state;
+		case fsm_deinit_state:	deinit();
+								state = fsm_gomain_state;
 								break;
 
-		case gomain_state:		gomain();
+		case fsm_gomain_state:	gomain();
 								break;
 
-		case reset_state:		reset();
+		case fsm_reset_state:	reset();
 								break;
 
 		}
@@ -99,12 +99,12 @@ void init()
 	init_operator_timer();
 }
 
-recv_st_t receive(req_buff_t *req_buff_st)
+recv_state_t receive(req_buff_t *req_buff_set)
 {
-	recv_st_t recv_st = recv_st_bad;
+	recv_state_t recv_state = recv_state_bad;
 
-	uint32_t *req_cnt = &(req_buff_st->cnt);
-	buff_size_t *req_buff = (req_buff_st->buff);
+	uint32_t *req_cnt = &(req_buff_set->cnt);
+	buff_size_t *req_buff = (req_buff_set->buff);
 
 	static uint32_t timer = 0;
 	uint32_t usart_ticks = xtim_get_ticks(&usart_tim);
@@ -122,92 +122,117 @@ recv_st_t receive(req_buff_t *req_buff_st)
 	if(((timer) && (usart_ticks >= timer) && (*req_cnt)) ||
 		(*req_cnt >= req_buff_len))
 	{
-		recv_st = recv_st_ok;
+		recv_state = recv_state_ok;
 		timer = 0;
 	}
 
-	return recv_st;
+	return recv_state;
 }
 
-void decode(const req_buff_t *req_buff_st, dec_buff_t *dec_buff_st)
+decode_state_t decode(const req_buff_t *req_buff_set)
 {
-	const uint32_t *req_cnt = &(req_buff_st->cnt);
-	const buff_size_t *req_buff = (req_buff_st->buff);
+	decode_state_t decode_state;
+	const uint32_t *req_cnt = &(req_buff_set->cnt);
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	/*uint32_t crc, crc_len;*/
 
-	uint32_t *dec_cnt = &(dec_buff_st->cnt);
-	buff_size_t *dec_buff = (dec_buff_st->buff);
+	if(!(*req_cnt))
+		decode_state = decode_state_bad;
+	else if(req_buff[bl_sig_pos] != bl_sig_in)
+		decode_state = decode_state_bad;
+	else
+		decode_state = decode_state_ok;
+#if 0
+	if(req_buff[bl_sig_pos] != bl_sig_in) {
+		decode_state = decode_state_bad;
+	} else {
+		crc_len = *req_cnt - 1;
+		crc = bloader_crc(req_buff, crc_len);
+		if(req_buff[*req_cnt] != crc)
+			decode_state = decode_state_bad;
+		else
+			decode_state = decode_state_ok;
+	}
+#endif
 
-	kememcpy(dec_buff, req_buff, *req_cnt);
-	*dec_cnt = *req_cnt;
+	return decode_state;
 }
 
-handle_st_t handle(const dec_buff_t *dec_buff_st, ans_buff_t *ans_buff_st)
+handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 {
-	const char reset_str[] = "Reset...\r";
-	const char gomain_str[] = "Gomain...\r";
-	const char info_str[] = "I'm  bloader!\r";
-	const char no_savvy_str[] = "No savvy @_@\r";
-	const char *ans_str;
+	/*const uint32_t *req_cnt = &(req_buff_set->cnt);*/
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
+	char ans_str[] = "\0";
 
-	const uint32_t *dec_cnt = &(dec_buff_st->cnt);
-	const buff_size_t *dec_buff = (dec_buff_st->buff);
-	uint32_t *ans_cnt = &(ans_buff_st->cnt);
-	buff_size_t *ans_buff = (ans_buff_st->buff);
+	bl_cmd_t cmd;
+	handle_state_t handle_state;
+	bl_state_t bl_state;
 
-	char command;
+	cmd = req_buff[bl_cmd_pos]; 
+	switch(cmd) {
+	case bl_cmd_reset: 	handle_state = handle_state_rst;	
+						break;
 
-	handle_st_t handle_st = handle_st_res;
+	case bl_cmd_gomain: handle_state = handle_state_main;	
+						break;
 
-	if(!(*dec_cnt))
-		return handle_st_bad;
+	case bl_cmd_write:	bl_state = bloader_write(req_buff_set);
+						if(bl_state == bl_bad_write)
+							handle_state = handle_state_err;
+						else
+							handle_state = handle_state_res;
+						break;
 
-	command = dec_buff[0]; 
-	switch(command) {
-	case 'R': 	handle_st = handle_st_rst;	
-				ans_str = reset_str;	
-				break;
+	case bl_cmd_read:	bl_state = bloader_read(req_buff_set, ans_buff_set);
+						if(bl_state == bl_bad_read)
+							handle_state = handle_state_err;
+						else
+							handle_state = handle_state_res;
+						break;
 
-	case 'M': 	handle_st = handle_st_main;	
-				ans_str = gomain_str;
-				break;
+	case bl_cmd_erase:	bl_state = bloader_erase(req_buff_set);
+						if(bl_state == bl_bad_erase)
+							handle_state = handle_state_err;
+						else
+							handle_state = handle_state_res;
+						break;
 
-	case 'I':	ans_str = info_str;	
-				break;
-
-	default:	ans_str = no_savvy_str;
+	default:			handle_state = handle_state_err;
 	}
 
 	*ans_cnt = kestrlen(ans_str);
 	kememcpy(ans_buff, ans_str, *ans_cnt);
 
-	return handle_st;
+	return handle_state;
 }
 
-void error(ans_buff_t *ans_buff_st)
+void error(ans_buff_t *ans_buff_set)
 {
 	/*err_t err = get_err()*/
 	/*switch(err) { ... }*/
-	uint32_t *ans_cnt = &(ans_buff_st->cnt);
-	buff_size_t *ans_buff = (ans_buff_st->buff);
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
 
 	const char err_str[] = "Error!\r";	
 	*ans_cnt = kestrlen(err_str);
 	kememcpy(ans_buff, err_str, *ans_cnt);
 }
 
-void respond(const ans_buff_t *ans_buff_st)
+void respond(const ans_buff_t *ans_buff_set)
 {
-	const uint32_t ans_cnt = ans_buff_st->cnt;
-	const buff_size_t *ans_buff = (ans_buff_st->buff);
+	const uint32_t ans_cnt = ans_buff_set->cnt;
+	const buff_size_t *ans_buff = (ans_buff_set->buff);
 	
 	if(ans_cnt)
 		xusart_put_buff(&usart0, ans_buff, ans_cnt);
 }
 
-void purge(req_buff_t *req_buff_st, ans_buff_t *ans_buff_st)
+void purge(req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 {
-	req_buff_st->cnt = 0;
-	ans_buff_st->cnt = 0;
+	req_buff_set->cnt = 0;
+	ans_buff_set->cnt = 0;
 }
 
 void deinit()
@@ -240,37 +265,50 @@ void gomain()
 	main_jump();
 }
 
-fsm_state_t switch_state_after_recv(const recv_st_t recv_st)
+fsm_state_t switch_state_after_recv(const recv_state_t recv_state)
 {
 	fsm_state_t next_state;
-	switch(recv_st) {
-	case recv_st_ok:	next_state = decode_state;
-						break;
-	case recv_st_bad:	next_state = receive_state;
-						break;
-	default:			next_state = purge_state;	
+	switch(recv_state) {
+	case recv_state_ok:		next_state = fsm_decode_state;
+							break;
+	case recv_state_bad:	next_state = fsm_receive_state;
+							break;
+	default:				next_state = fsm_purge_state;
 	}
 	return next_state;
 }
 
-fsm_state_t switch_state_after_handle(const handle_st_t handle_st)
+fsm_state_t switch_state_after_decode(const decode_state_t decode_state)
 {
 	fsm_state_t next_state;
-	switch(handle_st) {
-	case handle_st_rst:		next_state = reset_state;
+	switch(decode_state) {
+	case decode_state_bad:	next_state = fsm_purge_state;
 							break;
+	case decode_state_ok:	next_state = fsm_handle_state;
+							break;
+	default:				next_state = fsm_purge_state;
+	}
+	return next_state;
+}
 
-	case handle_st_main:	next_state = deinit_state;
-							break;
+fsm_state_t switch_state_after_handle(const handle_state_t handle_state)
+{
+	fsm_state_t next_state;
+	switch(handle_state) {
+	case handle_state_rst:		next_state = fsm_reset_state;
+								break;
 
-	case handle_st_res:		next_state = respond_state;
-							break;
+	case handle_state_main:		next_state = fsm_deinit_state;
+								break;
 
-	case handle_st_bad:		next_state = error_state;
-							break;
+	case handle_state_res:		next_state = fsm_respond_state;
+								break;
 
-	default:				next_state = purge_state;
-							break;
+	case handle_state_err:		next_state = fsm_error_state;
+								break;
+
+	default:					next_state = fsm_purge_state;
+								break;
 	}
 	return next_state;
 }

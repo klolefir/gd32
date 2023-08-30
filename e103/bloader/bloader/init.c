@@ -22,7 +22,7 @@ void init_operator_timer()
 {
 	usart_tim.tim = tim_num_5;
 	usart_tim.psc = rcu_clock_freq_get(CK_APB1) / 1000;
-	usart_tim.per = 1000;
+	usart_tim.per = 1;
 	usart_tim.align = tim_align_edge;
 	usart_tim.counter_dir = tim_counter_dir_up;
 	usart_tim.clkdiv = tim_clkdiv_1;

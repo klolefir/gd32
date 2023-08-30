@@ -4,31 +4,35 @@
 void fsm_process();
 
 typedef enum {
-	idle_state,
-	init_state,
-	wait_state,
-	receive_state,
-	decode_state,
-	handle_state,
-	respond_state,
-	purge_state,
-	reset_state,
-	error_state,
-	deinit_state,
-	gomain_state
+	fsm_idle_state,
+	fsm_init_state,
+	fsm_wait_state,
+	fsm_receive_state,
+	fsm_decode_state,
+	fsm_handle_state,
+	fsm_respond_state,
+	fsm_purge_state,
+	fsm_reset_state,
+	fsm_error_state,
+	fsm_deinit_state,
+	fsm_gomain_state
 } fsm_state_t;
 
 typedef enum {
-	recv_st_ok,
-	recv_st_bad
-} recv_st_t;
+	recv_state_ok,
+	recv_state_bad
+} recv_state_t;
 
 typedef enum {
-	handle_st_ok,
-	handle_st_rst,
-	handle_st_bad,
-	handle_st_main,
-	handle_st_res
-} handle_st_t;
+	decode_state_ok,
+	decode_state_bad
+} decode_state_t;
+
+typedef enum {
+	handle_state_rst,
+	handle_state_err,
+	handle_state_main,
+	handle_state_res
+} handle_state_t;
 
 #endif

@@ -16,17 +16,29 @@ enum {
 	fmc_page100_addr	= fmc_page0_addr + 100 * fmc_page_size,
 	fmc_page101_addr	= fmc_page0_addr + 101 * fmc_page_size,
 	fmc_page102_addr	= fmc_page0_addr + 102 * fmc_page_size,
+	fmc_page127_addr	= fmc_page0_addr + 127 * fmc_page_size,
+	fmc_page_num		= 128,
 
 	fmc_word_size		= 0x04,
 	fmc_addr_offset 	= 0x04,
 	fmc_max_sector_size	= 0x100,	/* 256 bytes */
 	fmc_max_read_size	= 0x100, 	/* 256 bytes */
-	fmc_max_write_size	= 0x100  	/* 256 bytes */
+	fmc_max_write_size	= 0x100,  	/* 256 bytes */
+	fmc_max_erase_size	= 0x100  	/* 256 bytes */
 };
 
-void fmc_erase_sector(uint32_t page_addr, uint32_t size);
-void fmc_write_sector(uint32_t addr, uint32_t *data, uint32_t size);
-void fmc_read_sector(uint32_t addr, uint32_t *data, uint32_t size);
+typedef enum {
+	fmc_bad_write,
+	fmc_ok_write,
+	fmc_bad_read,
+	fmc_ok_read,
+	fmc_bad_erase,
+	fmc_ok_erase
+} fmc_state_t;
+
+fmc_state_t xfmc_erase_sector(const uint32_t addr, const uint32_t size);
+fmc_state_t xfmc_write_sector(const uint32_t addr, const uint32_t *data, const uint32_t size);
+fmc_state_t xfmc_read_sector(const uint32_t addr, uint32_t *data, const uint32_t size);
 
 #if 0
 void flash_unlock();

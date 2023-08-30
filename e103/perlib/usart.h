@@ -84,7 +84,7 @@ typedef enum {
 
 typedef enum {
 	usart_rx_irq_off,
-	usart_rx_irq_on,
+	usart_rx_irq_on
 } usart_rx_irq_state_t;
 
 typedef enum {
@@ -110,6 +110,7 @@ void xusart_put_char(usart_t *usart_set, const char c);
 void xusart_put_uint32(usart_t *usart_set, const uint32_t data);
 void xusart_put_str(usart_t *usart_set, const char *str);
 void xusart_put_buff(usart_t *usart_set, const void *buff, const uint32_t byte_num);
+void xusart_put_current_flags(usart_t *usart_set);
 void xusart_get_char(usart_t *usart_set, char *c);
 //void usart_get_str(usart_t *usart_st, char *str, char term);
 
@@ -125,10 +126,10 @@ void xusart_tx_disable(usart_t *usart_set);
 void xusart_rx_irq_enalbe(usart_t *usart_set);
 void xusart_rx_irq_disable(usart_t *usart_set);
 
-void xusart_tx_irq_enalbe(usart_t *usart_st);
-void xusart_tx_irq_disable(usart_t *usart_st);
+void xusart_tx_irq_enalbe(usart_t *usart_set);
+void xusart_tx_irq_disable(usart_t *usart_set);
 
-usart_rx_status_t xusart_get_rx_status(usart_t *usart_setup);
-usart_tx_status_t xusart_get_tx_status(usart_t *usart_setup);
+usart_rx_status_t xusart_get_rx_status(usart_t *usart_set);
+usart_tx_status_t xusart_get_tx_status(usart_t *usart_set);
 
 #endif

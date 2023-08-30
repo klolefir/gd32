@@ -15,7 +15,7 @@ CPPFLAGS = 	$(MACRO) \
 LINKER_FILE = ../general/link.ld
 LDFLAGS = -Wall -g -nostdlib -T $(LINKER_FILE)
 
-MAIN_SOURCE = ./main.c ./fsm.c ./init.c
+MAIN_SOURCE = ./main.c ./fsm.c ./init.c ./bloader.c
 SYSTEM_SOURCE = ../../vendor/cmsis/gd32e10x/src/system_gd32e10x.c
 STARTUP_SOURCE = ../general/startup.c
 CMSIS_SOURCE = 	../../vendor/cmsis/gd32e10x/per/src/gd32e10x_rcu.c \
@@ -28,7 +28,8 @@ PERLIB_SOURCE = ../../perlib/usart.c \
 				../../perlib/gpio.c \
 				../../perlib/tim.c \
 				../../perlib/rcu.c \
-				../../perlib/tim_hd.c
+				../../perlib/tim_hd.c \
+				../../perlib/fmc.c
 KELIB_SOURCE = ../../kelib/kestring.c
 
 SOURCES = $(MAIN_SOURCE) $(SYSTEM_SOURCE) $(STARTUP_SOURCE) $(CMSIS_SOURCE) $(PERLIB_SOURCE) $(KELIB_SOURCE)

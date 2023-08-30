@@ -18,11 +18,11 @@ void xusart_init(usart_t *usart_set)
 	usart_stb_t stop_bit				= usart_set->stop_bit;
 	usart_tx_state_t tx_state			= usart_set->tx_state;
 	usart_rx_state_t rx_state			= usart_set->rx_state;
-#ifdef DEBUG
-	usart_deinit(usart);
-#endif
+
 	xusart_gpio_init(usart_set);
 	xusart_rcu_init(usart_set);
+
+	usart_deinit(usart);
 
 	usart_baudrate_set(usart, baud);
 	usart_parity_config(usart, parity);
@@ -171,6 +171,55 @@ void xusart_get_char(usart_t *usart_set, char *c)
 	*c = (uint8_t)usart_data_receive(usart);
 }
 
+void xusart_put_current_flags(usart_t *usart_set)
+{
+	usart_num_t usart = usart_set->usart;
+	FlagStatus status;
+
+	status = usart_flag_get(usart, USART_FLAG_CTS);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_CTS\r");
+	status = usart_flag_get(usart, USART_FLAG_LBD);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_LBD\r");
+	status = usart_flag_get(usart, USART_FLAG_TBE);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_TBE\r");
+	status = usart_flag_get(usart, USART_FLAG_TC);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_TC\r");
+	status = usart_flag_get(usart, USART_FLAG_RBNE);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_RBNE\r");
+	status = usart_flag_get(usart, USART_FLAG_IDLE);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_IDLE\r");
+	status = usart_flag_get(usart, USART_FLAG_ORERR);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_ORERR\r");
+	status = usart_flag_get(usart, USART_FLAG_NERR);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_NERR\r");
+	status = usart_flag_get(usart, USART_FLAG_FERR);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_FERR\r");
+	status = usart_flag_get(usart, USART_FLAG_PERR);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_PERR\r");
+	status = usart_flag_get(usart, USART_FLAG_BSY);
+	if(status)
+		xusart_put_str(usart_set, "USART_FLAG_BSY\r");
+	status = usart_flag_get(usart, USART_FLAG_EB);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_EB\r");
+	status = usart_flag_get(usart, USART_FLAG_RT);
+	if(status)
+		xusart_put_str(usart_set,"USART_FLAG_RT\r");
+	status = usart_flag_get(usart, USART_FLAG_EPERR);
+	if(status)
+		xusart_put_str(usart_set, "USART_FLAG_EPERR\r");
+}
+
 void xusart_gpio_init(usart_t *usart_set)
 {
 	gpio_t tx_pin, rx_pin;
@@ -180,9 +229,10 @@ void xusart_gpio_init(usart_t *usart_set)
 	usart_num_t usart = usart_set->usart;
 
 	tx_pin.mode 	= gpio_mode_af_pp;
-	tx_pin.speed 	= gpio_ospeed_max;
-	rx_pin.mode 	= gpio_mode_af_pp;
-	rx_pin.speed 	= gpio_ospeed_max;
+	tx_pin.speed 	= gpio_ospeed_50mhz;
+	/*rx_pin.mode 	= gpio_mode_af_pp;*/
+	rx_pin.mode 	= gpio_mode_in_float;
+	rx_pin.speed 	= gpio_ospeed_50mhz;
 
 	switch(usart) {
 	case usart_num_0:	tx_port 	= usart0_gpio_port;

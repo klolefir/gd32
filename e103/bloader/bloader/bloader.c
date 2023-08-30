@@ -1,13 +1,87 @@
 #include "bloader.h"
-#include "flash.h"
+#include "fmc.h"
 
-static handle_st_t bloader_erase();
-static handle_st_t bloader_unlock();
-static handle_st_t bloader_lock();
-static handle_st_t bloader_write(const uint32_t *data, const uint32_t size);
-static handle_st_t bloader_read(uint32_t *data, const uint32_t size);
-static handle_st_t bloader_test(uint32_t *data);
+bl_state_t bloader_erase(const req_buff_t *req_buff_set)
+{
+	/*const uint32_t *req_cnt = &(req_buff_set->cnt);*/
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint32_t addr = req_buff[bl_addr_pos]; 
+	uint32_t len = req_buff[bl_len_pos];
+	bl_state_t bl_state;
+	fmc_state_t fmc_state;
 
+	if(len > bl_max_page_size)
+		return bl_bad_len;
+
+	fmc_unlock();
+	fmc_state = xfmc_erase_sector(addr, len);
+	fmc_lock();
+
+	switch(fmc_state) {
+	case fmc_ok_erase:	bl_state = bl_ok_erase;
+						break;
+	case fmc_bad_erase:
+	default:			bl_state = bl_bad_erase;
+	}
+	return bl_state;
+}
+
+bl_state_t bloader_write(const req_buff_t *req_buff_set)
+{
+/*	const uint32_t *req_cnt = &(req_buff_set->cnt);*/
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint32_t addr = req_buff[bl_addr_pos]; 
+	uint32_t len = req_buff[bl_len_pos];
+	uint32_t *data = (uint32_t *)(req_buff + bl_data_pos);
+	bl_state_t bl_state;
+	fmc_state_t fmc_state;
+
+	if(len > bl_max_page_size)
+		return bl_bad_len;
+	
+	fmc_unlock();
+	fmc_state = xfmc_write_sector(addr, data, len);
+	fmc_lock();
+
+	switch(fmc_state) {
+	case fmc_ok_write:	bl_state = bl_ok_write;
+						break;
+	case fmc_bad_write:	
+	default:			bl_state = bl_bad_write;
+	}
+	return bl_state;
+}
+
+bl_state_t bloader_read(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
+{
+	/*const uint32_t *req_cnt = &(req_buff_set->cnt);*/
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
+	uint32_t addr = req_buff[bl_addr_pos]; 
+	uint32_t len = req_buff[bl_len_pos];
+	uint32_t *data = (uint32_t *)(ans_buff + bl_data_pos);
+	bl_state_t bl_state;
+	fmc_state_t fmc_state;
+
+	if(len > bl_max_page_size)
+		return bl_bad_len;
+	*ans_cnt += len;	
+
+	fmc_unlock();
+	fmc_state = xfmc_read_sector(addr, data, len);
+	fmc_lock();
+
+	switch(fmc_state) {
+	case fmc_ok_read:	bl_state = bl_ok_read;
+						break;
+	case fmc_bad_read:	
+	default:			bl_state = bl_bad_read;
+	}
+	return bl_state;
+}
+
+#if 0
 handle_st_t bloader_handle(const dec_buff_t *dec_buff_st, ans_buff_t *ans_buff_st)
 {
 	handle_st_t handle_st;
@@ -196,6 +270,7 @@ handle_st_t bloader_lock()
 	flash_lock();
 	return handle_st_res;
 }
+#endif
 
 #if 0
 void bloader_enter()
