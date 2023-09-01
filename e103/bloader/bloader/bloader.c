@@ -1,14 +1,17 @@
 #include "bloader.h"
 #include "fmc.h"
+#include "kestring.h"
 
-bl_state_t bloader_erase(const req_buff_t *req_buff_set)
+bl_state_t bloader_erase(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 {
-	/*const uint32_t *req_cnt = &(req_buff_set->cnt);*/
 	const buff_size_t *req_buff = (req_buff_set->buff);
-	uint32_t addr = req_buff[bl_addr_pos]; 
-	uint32_t len = req_buff[bl_len_pos];
-	bl_state_t bl_state;
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
 	fmc_state_t fmc_state;
+
+	uint32_t addr, len;
+	kememcpy(&addr, &req_buff[bl_addr_pos], bl_addr_size);
+	kememcpy(&len, &req_buff[bl_len_pos], bl_len_size);
 
 	if(len > bl_max_page_size)
 		return bl_bad_len;
@@ -17,24 +20,37 @@ bl_state_t bloader_erase(const req_buff_t *req_buff_set)
 	fmc_state = xfmc_erase_sector(addr, len);
 	fmc_lock();
 
+	if(fmc_state == fmc_bad_erase)
+		return bl_bad_erase;
+#if 0
 	switch(fmc_state) {
 	case fmc_ok_erase:	bl_state = bl_ok_erase;
 						break;
 	case fmc_bad_erase:
 	default:			bl_state = bl_bad_erase;
 	}
-	return bl_state;
+#endif
+
+	kememcpy(&ans_buff[bl_addr_pos], &addr, bl_addr_size);
+	kememcpy(&ans_buff[bl_len_pos], ans_cnt, bl_len_size);
+	*ans_cnt += bl_addr_size;
+	*ans_cnt += bl_len_size;
+
+	return bl_ok_erase;
 }
 
-bl_state_t bloader_write(const req_buff_t *req_buff_set)
+bl_state_t bloader_write(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 {
-/*	const uint32_t *req_cnt = &(req_buff_set->cnt);*/
 	const buff_size_t *req_buff = (req_buff_set->buff);
-	uint32_t addr = req_buff[bl_addr_pos]; 
-	uint32_t len = req_buff[bl_len_pos];
-	uint32_t *data = (uint32_t *)(req_buff + bl_data_pos);
-	bl_state_t bl_state;
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
+	uint32_t *data = (uint32_t *)&req_buff[bl_data_pos];
+	/*bl_state_t bl_state;*/
 	fmc_state_t fmc_state;
+
+	uint32_t addr, len;
+	kememcpy(&addr, &req_buff[bl_addr_pos], bl_addr_size);
+	kememcpy(&len, &req_buff[bl_len_pos], bl_len_size);
 
 	if(len > bl_max_page_size)
 		return bl_bad_len;
@@ -43,13 +59,23 @@ bl_state_t bloader_write(const req_buff_t *req_buff_set)
 	fmc_state = xfmc_write_sector(addr, data, len);
 	fmc_lock();
 
+	if(fmc_state == fmc_bad_write)
+		return bl_bad_write;
+#if 0
 	switch(fmc_state) {
 	case fmc_ok_write:	bl_state = bl_ok_write;
 						break;
 	case fmc_bad_write:	
 	default:			bl_state = bl_bad_write;
 	}
-	return bl_state;
+#endif
+
+	kememcpy(&ans_buff[bl_addr_pos], &addr, bl_addr_size);
+	kememcpy(&ans_buff[bl_len_pos], ans_cnt, bl_len_size);
+	*ans_cnt += bl_addr_size;
+	*ans_cnt += bl_len_size;
+
+	return bl_ok_write;
 }
 
 bl_state_t bloader_read(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
@@ -58,27 +84,51 @@ bl_state_t bloader_read(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set
 	const buff_size_t *req_buff = (req_buff_set->buff);
 	uint32_t *ans_cnt = &(ans_buff_set->cnt);
 	buff_size_t *ans_buff = (ans_buff_set->buff);
-	uint32_t addr = req_buff[bl_addr_pos]; 
-	uint32_t len = req_buff[bl_len_pos];
-	uint32_t *data = (uint32_t *)(ans_buff + bl_data_pos);
-	bl_state_t bl_state;
+	uint32_t *data = (uint32_t *)&ans_buff[bl_data_pos];
+
+	/*bl_state_t bl_state;*/
 	fmc_state_t fmc_state;
+
+	uint32_t addr, len;
+	kememcpy(&addr, &req_buff[bl_addr_pos], bl_addr_size);
+	kememcpy(&len, &req_buff[bl_len_pos], bl_len_size);
 
 	if(len > bl_max_page_size)
 		return bl_bad_len;
-	*ans_cnt += len;	
 
 	fmc_unlock();
 	fmc_state = xfmc_read_sector(addr, data, len);
 	fmc_lock();
 
+	if(fmc_state == fmc_bad_read)
+		return bl_bad_read;
+#if 0
 	switch(fmc_state) {
 	case fmc_ok_read:	bl_state = bl_ok_read;
 						break;
 	case fmc_bad_read:	
 	default:			bl_state = bl_bad_read;
 	}
-	return bl_state;
+#endif
+
+	kememcpy(&ans_buff[bl_addr_pos], &addr, bl_addr_size);
+	kememcpy(&ans_buff[bl_len_pos], ans_cnt, bl_len_size);
+	*ans_cnt += bl_addr_size;
+	*ans_cnt += bl_len_size;
+	*ans_cnt += len;
+
+	return bl_ok_read;
+}
+
+bl_state_t bloader_test(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
+{
+	const uint32_t *req_cnt = &(req_buff_set->cnt);
+	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint32_t *ans_cnt = &(ans_buff_set->cnt);
+	buff_size_t *ans_buff = (ans_buff_set->buff);
+	*ans_cnt = *req_cnt;
+	kememcpy(ans_buff, req_buff, *req_cnt);
+	return bl_ok_read;
 }
 
 #if 0

@@ -18,9 +18,9 @@ enum {
 };
 
 enum {
-	req_buff_len = 512,
+	req_buff_len = 300,
 	dec_buff_len = 512,
-	ans_buff_len = 512
+	ans_buff_len = 300
 };
 
 typedef struct {

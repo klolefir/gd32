@@ -23,3 +23,15 @@ void kememcpy(void *dst, const void *src, const uint32_t count)
 		src_byte++;
 	}
 }
+
+void kelmemcpy(void *dst, const void *src, const uint32_t count)
+{
+	/*byte access*/
+	uint8_t *dst_byte = dst;
+	const uint8_t *src_byte = src;
+	int i, j;
+
+	for(i = count - 1, j = 0; i >= 0; i--, j++) {
+		*(dst_byte + j) = *(src_byte + i);
+	}
+}

@@ -10,6 +10,7 @@ typedef enum {
 	fsm_receive_state,
 	fsm_decode_state,
 	fsm_handle_state,
+	fsm_code_state,
 	fsm_respond_state,
 	fsm_purge_state,
 	fsm_reset_state,

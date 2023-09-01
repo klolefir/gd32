@@ -11,6 +11,7 @@ static void init();
 static recv_state_t receive(req_buff_t *req_buff_set);
 static decode_state_t decode(const req_buff_t *req_buff_set);
 static handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
+static void code(ans_buff_t *ans_buff_set);
 static void respond(const ans_buff_t *ans_buff_set);
 static void purge(req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
 static void reset();
@@ -58,6 +59,10 @@ void fsm_process()
 
 		case fsm_handle_state:	handle_state= handle(&req_buff_set, &ans_buff_set);
 								state = switch_state_after_handle(handle_state);
+								break;
+
+		case fsm_code_state:	code(&ans_buff_set);
+								state = fsm_respond_state;
 								break;
 
 		case fsm_error_state:	error(&ans_buff_set);
@@ -112,7 +117,7 @@ recv_state_t receive(req_buff_t *req_buff_set)
 
 	usart_rx_status_t rx_status = xusart_get_rx_status(&usart0);
 	if(rx_status == usart_rx_rdy) {
-		xgpio_tgl(&debug_led);
+		/*xgpio_tgl(&debug_led);*/
 		xusart_get_char(&usart0, &c);
 		req_buff[*req_cnt] = c;
 		(*req_cnt)++;
@@ -134,11 +139,14 @@ decode_state_t decode(const req_buff_t *req_buff_set)
 	decode_state_t decode_state;
 	const uint32_t *req_cnt = &(req_buff_set->cnt);
 	const buff_size_t *req_buff = (req_buff_set->buff);
+	uint16_t sig_in;
+	/*kelmemcpy(&sig_in, &req_buff[bl_sig_pos], 2 * sizeof(char));*/
+	kememcpy(&sig_in, &req_buff[bl_sig_pos], 2 * sizeof(char));
 	/*uint32_t crc, crc_len;*/
 
 	if(!(*req_cnt))
 		decode_state = decode_state_bad;
-	else if(req_buff[bl_sig_pos] != bl_sig_in)
+	else if(sig_in != bl_sig_in)
 		decode_state = decode_state_bad;
 	else
 		decode_state = decode_state_ok;
@@ -164,21 +172,25 @@ handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 	const buff_size_t *req_buff = (req_buff_set->buff);
 	uint32_t *ans_cnt = &(ans_buff_set->cnt);
 	buff_size_t *ans_buff = (ans_buff_set->buff);
-	char ans_str[] = "\0";
 
 	bl_cmd_t cmd;
 	handle_state_t handle_state;
 	bl_state_t bl_state;
 
-	cmd = req_buff[bl_cmd_pos]; 
+	kememcpy(&cmd, &req_buff[bl_cmd_pos], 4 * sizeof(char));
+
 	switch(cmd) {
-	case bl_cmd_reset: 	handle_state = handle_state_rst;	
+	case bl_cmd_test: 	bloader_test(req_buff_set, ans_buff_set);		
+						handle_state = handle_state_res;
+						break;
+
+	case bl_cmd_reset: 	handle_state = handle_state_rst;
 						break;
 
 	case bl_cmd_gomain: handle_state = handle_state_main;	
 						break;
 
-	case bl_cmd_write:	bl_state = bloader_write(req_buff_set);
+	case bl_cmd_write:	bl_state = bloader_write(req_buff_set, ans_buff_set);
 						if(bl_state == bl_bad_write)
 							handle_state = handle_state_err;
 						else
@@ -192,7 +204,7 @@ handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 							handle_state = handle_state_res;
 						break;
 
-	case bl_cmd_erase:	bl_state = bloader_erase(req_buff_set);
+	case bl_cmd_erase:	bl_state = bloader_erase(req_buff_set, ans_buff_set);
 						if(bl_state == bl_bad_erase)
 							handle_state = handle_state_err;
 						else
@@ -202,8 +214,8 @@ handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 	default:			handle_state = handle_state_err;
 	}
 
-	*ans_cnt = kestrlen(ans_str);
-	kememcpy(ans_buff, ans_str, *ans_cnt);
+	kememcpy(&ans_buff[bl_cmd_pos], &cmd, bl_cmd_size);
+	*ans_cnt += bl_cmd_size;
 
 	return handle_state;
 }
@@ -215,9 +227,18 @@ void error(ans_buff_t *ans_buff_set)
 	uint32_t *ans_cnt = &(ans_buff_set->cnt);
 	buff_size_t *ans_buff = (ans_buff_set->buff);
 
-	const char err_str[] = "Error!\r";	
+	const char err_str[] = "Error!\r";
 	*ans_cnt = kestrlen(err_str);
 	kememcpy(ans_buff, err_str, *ans_cnt);
+}
+
+void code(ans_buff_t *ans_buff_set)
+{
+	uint32_t *ans_cnt = &ans_buff_set->cnt;
+	buff_size_t *ans_buff = (ans_buff_set->buff);
+	uint16_t sig = bl_sig_out;
+	kememcpy(&ans_buff[bl_sig_pos], &sig, bl_sig_size);
+	*ans_cnt += bl_sig_size;
 }
 
 void respond(const ans_buff_t *ans_buff_set)
@@ -301,7 +322,8 @@ fsm_state_t switch_state_after_handle(const handle_state_t handle_state)
 	case handle_state_main:		next_state = fsm_deinit_state;
 								break;
 
-	case handle_state_res:		next_state = fsm_respond_state;
+	case handle_state_res:		/*next_state = fsm_respond_state;*/
+								next_state = fsm_code_state;
 								break;
 
 	case handle_state_err:		next_state = fsm_error_state;

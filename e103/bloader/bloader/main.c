@@ -19,3 +19,28 @@ void set_err
 {
 }
 #endif
+
+void hard_fault_handler()
+{
+	while(1) {}
+}
+
+void nmi_handler(void)
+{
+	while(1) {}
+}
+
+void mem_manage_handler(void)
+{
+	while(1) {}
+}
+
+void bus_fault_handler(void)
+{
+	while(1) {}
+}
+
+void usage_fault_handler(void)
+{
+	while(1) {}
+}

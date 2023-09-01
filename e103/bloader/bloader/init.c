@@ -13,7 +13,7 @@ void init_operator()
 	usart0.stop_bit = usart_stb_1bit;
 	usart0.tx_state = usart_tx_on;
 	usart0.rx_state = usart_rx_on;
-	usart0.rx_irq_state = usart_tx_irq_off;
+	usart0.tx_irq_state = usart_tx_irq_off;
 	usart0.rx_irq_state = usart_rx_irq_off;
 	xusart_init(&usart0);
 }

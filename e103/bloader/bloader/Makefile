@@ -3,7 +3,7 @@ CC = arm-none-eabi-gcc
 
 OPTIMIZATION = -O0
 CFLAGS = -Wall -g -mcpu=cortex-m4 -mthumb $(OPTIMIZATION)
-MACRO = -D GD32E103V_EVAL
+MACRO = -D GD32E103V_EVAL #-D VECT_TAB_SRAM
 CPPFLAGS = 	$(MACRO) \
 			-I ./ \
 		   	-I ../../vendor/cmsis/gd32e10x/inc \

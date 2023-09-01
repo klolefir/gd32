@@ -12,6 +12,13 @@ enum {
 	bl_sig_out 	= 0xBEF9
 };
 
+enum {
+	bl_sig_size = 2,
+	bl_cmd_size = 4,
+	bl_addr_size = 4,
+	bl_len_size = 4
+};
+
 enum { /* byte */
 	bl_sig_pos 	= 0,
 	bl_cmd_pos 	= bl_sig_pos + 2,
@@ -26,7 +33,8 @@ typedef enum {
 	bl_cmd_gomain 	= 0x00000003,
 	bl_cmd_write	= 0x00000004,
 	bl_cmd_read		= 0x00000005,
-	bl_cmd_erase	= 0x00000006
+	bl_cmd_erase	= 0x00000006,
+	bl_cmd_test		= 0x00000007
 } bl_cmd_t;
 
 typedef enum {
@@ -39,8 +47,9 @@ typedef enum {
 	bl_ok_read
 } bl_state_t;
 
-bl_state_t bloader_erase(const req_buff_t *req_buff_set);
-bl_state_t bloader_write(const req_buff_t *req_buff_set);
+bl_state_t bloader_erase(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
+bl_state_t bloader_write(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
 bl_state_t bloader_read(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
+bl_state_t bloader_test(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set);
 
 #endif
