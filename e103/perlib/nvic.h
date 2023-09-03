@@ -24,6 +24,7 @@ typedef enum {
 	usart0_irqn			= USART0_IRQn,
 	usart1_irqn			= USART1_IRQn,
 	usart2_irqn			= USART2_IRQn,
+	spi0_irqn		  	= SPI0_IRQn,
 	spi1_irqn		  	= SPI1_IRQn,
 	spi2_irqn		  	= SPI2_IRQn
 } nvic_irqn_t;
