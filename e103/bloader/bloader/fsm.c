@@ -140,8 +140,7 @@ decode_state_t decode(const req_buff_t *req_buff_set)
 	const uint32_t *req_cnt = &(req_buff_set->cnt);
 	const buff_size_t *req_buff = (req_buff_set->buff);
 	uint16_t sig_in;
-	/*kelmemcpy(&sig_in, &req_buff[bl_sig_pos], 2 * sizeof(char));*/
-	kememcpy(&sig_in, &req_buff[bl_sig_pos], 2 * sizeof(char));
+	kememcpy(&sig_in, &req_buff[bl_sig_pos], bl_sig_size);
 	/*uint32_t crc, crc_len;*/
 
 	if(!(*req_cnt))
@@ -170,17 +169,19 @@ handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 {
 	/*const uint32_t *req_cnt = &(req_buff_set->cnt);*/
 	const buff_size_t *req_buff = (req_buff_set->buff);
+#if 0
 	uint32_t *ans_cnt = &(ans_buff_set->cnt);
 	buff_size_t *ans_buff = (ans_buff_set->buff);
+#endif
 
 	bl_cmd_t cmd;
 	handle_state_t handle_state;
-	bl_state_t bl_state;
+	/*bl_status_t bl_state;*/
 
-	kememcpy(&cmd, &req_buff[bl_cmd_pos], 4 * sizeof(char));
+	kememcpy(&cmd, &req_buff[bl_cmd_pos], bl_cmd_size);
 
 	switch(cmd) {
-	case bl_cmd_test: 	bloader_test(req_buff_set, ans_buff_set);		
+	case bl_cmd_test: 	bloader_test(req_buff_set, ans_buff_set);
 						handle_state = handle_state_res;
 						break;
 
@@ -190,32 +191,46 @@ handle_state_t handle(const req_buff_t *req_buff_set, ans_buff_t *ans_buff_set)
 	case bl_cmd_gomain: handle_state = handle_state_main;	
 						break;
 
-	case bl_cmd_write:	bl_state = bloader_write(req_buff_set, ans_buff_set);
+	case bl_cmd_write:	bloader_write(req_buff_set, ans_buff_set);
+						handle_state = handle_state_res;
+						break;
+#if 0
+						bl_state = bloader_write(req_buff_set, ans_buff_set);
 						if(bl_state == bl_bad_write)
 							handle_state = handle_state_err;
 						else
 							handle_state = handle_state_res;
 						break;
+#endif
 
-	case bl_cmd_read:	bl_state = bloader_read(req_buff_set, ans_buff_set);
+	case bl_cmd_read:	bloader_read(req_buff_set, ans_buff_set);
+						handle_state = handle_state_res;
+						break;
+
+#if 0
+						bl_state = bloader_read(req_buff_set, ans_buff_set);
 						if(bl_state == bl_bad_read)
 							handle_state = handle_state_err;
 						else
 							handle_state = handle_state_res;
 						break;
+#endif
 
-	case bl_cmd_erase:	bl_state = bloader_erase(req_buff_set, ans_buff_set);
+	case bl_cmd_erase:	bloader_erase(req_buff_set, ans_buff_set);
+						handle_state = handle_state_res;
+						break;
+#if 0
+						bl_state = bloader_erase(req_buff_set, ans_buff_set);
 						if(bl_state == bl_bad_erase)
 							handle_state = handle_state_err;
 						else
 							handle_state = handle_state_res;
 						break;
+#endif
 
 	default:			handle_state = handle_state_err;
 	}
 
-	kememcpy(&ans_buff[bl_cmd_pos], &cmd, bl_cmd_size);
-	*ans_cnt += bl_cmd_size;
 
 	return handle_state;
 }
@@ -262,6 +277,9 @@ void deinit()
 	xrcu_reset_ahb();
 	xrcu_reset_apb1();
 	xrcu_reset_apb2();
+	SysTick->CTRL = 0;
+	SysTick->LOAD = 0;
+	SysTick->VAL = 0;
 #if 0
 	xsystick_disable();
 	xsystick_reset();
@@ -274,12 +292,24 @@ void gomain()
 	main_f main_jump;
 
 	__disable_irq();
-//	__DSB();
-//	__ISB();
+
+	__DSB();
+	__ISB();
+
+	for (int i = 0; i < 8; i++) {
+		NVIC->ICER[i] = 0xFFFFFFFF; // disable IRQ
+		NVIC->ICPR[i] = 0xFFFFFFFF; // clear pending IRQ
+	}
+
 	SCB->VTOR = main_addr;
 
 	uint32_t msp = *((volatile uint32_t *)(main_addr));
 	__set_MSP(msp);
+
+	__DSB();
+	__ISB();
+
+	__enable_irq();
 
 	uint32_t main_jump_addr = *((uint32_t *)(main_addr + 0x04));
 	main_jump = (main_f)main_jump_addr;

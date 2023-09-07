@@ -133,6 +133,8 @@ typedef struct {
 void xspi_init(spi_t *spi_set);
 void xspi_enable(spi_t *spi_set);
 void xspi_disable(spi_t *spi_set);
+void xspi_bidir_receive(spi_t *spi_set);
+void xspi_bidir_transmit(spi_t *spi_set);
 void xspi_send_byte(spi_t *spi_set, uint8_t byte);
 void xspi_recv_byte(spi_t *spi_set, uint8_t *byte);
 void xspi_sendrecv_byte(spi_t *spi_set, uint8_t *byte);

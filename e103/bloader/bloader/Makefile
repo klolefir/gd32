@@ -41,6 +41,7 @@ LOAD_ADDR = 0x08000000
 OPENOCD = /usr/bin/openocd
 OPENOCD_INT = /usr/share/openocd/scripts/interface/stlink.cfg
 OPENOCD_TAR = /usr/share/openocd/scripts/target/gd32e1x.cfg
+OPENOCD_LCK = ../general/gd32e1x_lock.cfg
 OPENOCD_PORT = 3333
 
 GDB = gdb-multiarch

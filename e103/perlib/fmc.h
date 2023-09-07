@@ -13,6 +13,7 @@ enum {
 	fmc_page3_addr		= fmc_page0_addr + 3 * fmc_page_size,
 	fmc_page4_addr		= fmc_page0_addr + 4 * fmc_page_size,
 	fmc_page5_addr		= fmc_page0_addr + 5 * fmc_page_size,
+	fmc_page50_addr		= fmc_page0_addr + 50 * fmc_page_size,
 	fmc_page100_addr	= fmc_page0_addr + 100 * fmc_page_size,
 	fmc_page101_addr	= fmc_page0_addr + 101 * fmc_page_size,
 	fmc_page102_addr	= fmc_page0_addr + 102 * fmc_page_size,
@@ -28,17 +29,24 @@ enum {
 };
 
 typedef enum {
-	fmc_bad_write,
-	fmc_ok_write,
-	fmc_bad_read,
-	fmc_ok_read,
-	fmc_bad_erase,
-	fmc_ok_erase
-} fmc_state_t;
+	fmc_ready = FMC_READY,
+	fmc_busy = FMC_BUSY,
+	fmc_pgerr = FMC_PGERR,
+	fmc_pgaerr = FMC_PGAERR,
+	fmc_wperr = FMC_WPERR,
+	fmc_toerr = FMC_TOERR,
+	fmc_blen
+} fmc_status_t;
 
-fmc_state_t xfmc_erase_sector(const uint32_t addr, const uint32_t size);
-fmc_state_t xfmc_write_sector(const uint32_t addr, const uint32_t *data, const uint32_t size);
-fmc_state_t xfmc_read_sector(const uint32_t addr, uint32_t *data, const uint32_t size);
+fmc_status_t xfmc_erase_sector(uint32_t *addr, uint32_t *size);
+fmc_status_t xfmc_write_sector(uint32_t *addr, const uint32_t *data, uint32_t *size);
+fmc_status_t xfmc_read_sector(uint32_t *addr, uint32_t *data, uint32_t *size);
+
+#if 0
+fmc_status_t xfmc_erase_sector(const uint32_t addr, const uint32_t size);
+fmc_status_t xfmc_write_sector(const uint32_t addr, const uint32_t *data, const uint32_t size);
+fmc_status_t xfmc_read_sector(const uint32_t addr, uint32_t *data, const uint32_t size);
+#endif
 
 #if 0
 void flash_unlock();

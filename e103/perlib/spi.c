@@ -7,6 +7,8 @@ static void xspi_rcu_init(spi_t *spi_set);
 static void xspi_irq_init(spi_t *spi_set);
 static nvic_irqn_t xspi_switch_irqn(spi_t *spi_set);
 static int8_t xspi_switch_irq_prior(spi_t *spi_set);
+static void xspi_set_bidir_receive(spi_t *spi_set);
+static void xspi_set_bidir_transmit(spi_t *spi_set);
 
 
 void xspi_init(spi_t *spi_set)
@@ -45,7 +47,17 @@ void xspi_disable(spi_t *spi_set)
 void xspi_send_byte(spi_t *spi_set, uint8_t byte)
 {
 	spi_num_t spi = spi_set->spi;
+	spi_trans_mode_t trans_mode = spi_set->trans_mode;
 	spi_trans_status_t trans_status;
+
+	switch(trans_mode) {
+	case spi_trans_mode_bdreceive:		xspi_set_bidir_transmit(spi_set);
+										break;
+	case spi_trans_mode_bdtransmit:
+	case spi_trans_mode_fullduplex:		break;
+	case spi_trans_mode_receiveonly:
+	default:							return;
+	}
 
 	do {
 		trans_status = xspi_get_trans_status(spi_set);
@@ -57,8 +69,18 @@ void xspi_send_byte(spi_t *spi_set, uint8_t byte)
 void xspi_recv_byte(spi_t *spi_set, uint8_t *byte)
 {
 	spi_num_t spi = spi_set->spi;
-
+	spi_trans_mode_t trans_mode = spi_set->trans_mode;
 	spi_recv_status_t recv_status;
+
+	switch(trans_mode) {
+	case spi_trans_mode_bdtransmit:		xspi_set_bidir_receive(spi_set);
+										break;
+	case spi_trans_mode_bdreceive:
+	case spi_trans_mode_fullduplex:		break;
+	case spi_trans_mode_receiveonly:
+	default:							return;
+	}
+
 	do {
 		recv_status = xspi_get_recv_status(spi_set);
 	} while(recv_status == spi_recv_nrdy);
@@ -213,4 +235,18 @@ static int8_t xspi_switch_irq_prior(spi_t *spi_set)
 	case spi_num_2:	return spi2_irq_prior;
 	default:		return nvic_none_irq_prior;
 	}
+}
+
+void xspi_set_bidir_receive(spi_t *spi_set)
+{
+	spi_num_t spi = spi_set->spi;
+	spi_set->trans_mode = spi_trans_mode_bdreceive;
+	spi_bidirectional_transfer_config(spi, SPI_BIDIRECTIONAL_RECEIVE);
+}
+
+void xspi_set_bidir_transmit(spi_t *spi_set)
+{
+	spi_num_t spi = spi_set->spi;
+	spi_set->trans_mode = spi_trans_mode_bdtransmit;
+	spi_bidirectional_transfer_config(spi, SPI_BIDIRECTIONAL_TRANSMIT);
 }

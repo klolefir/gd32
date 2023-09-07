@@ -144,7 +144,7 @@ void adc_special_function_config(uint32_t adc_periph , uint32_t function , Contr
         if(0U != (function & ADC_CONTINUOUS_MODE)){
             /* disable continuous mode */
             ADC_CTL1(adc_periph) &= ~ADC_CONTINUOUS_MODE;
-        }       
+        }
     }
 }
 

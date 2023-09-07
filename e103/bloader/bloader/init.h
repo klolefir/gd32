@@ -13,7 +13,8 @@ extern gpio_t debug_led;
 typedef uint8_t buff_size_t;
 
 enum {
-	main_addr = fmc_page100_addr,
+	//main_addr 	= fmc_page100_addr,
+	main_addr 	= 0x800c800,
 	main_sector = main_addr
 };
 
