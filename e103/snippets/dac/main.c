@@ -39,7 +39,7 @@ void init()
 	SystemInit();
 	SystemCoreClockUpdate();
 
-	xsystick_init(1000);
+	xsystick_init(1000000);
 	init_usart();
 	init_dac();
 }

@@ -7,7 +7,8 @@ enum {
 	gd25q16c_spi_num 	= spi_num_0,
 	gd25q16c_spi_psc 	= spi_psc_8,
 	gd25q16c_cs_port 	= gpio_port_e,
-	gd25q16c_cs_pin 	= gpio_pin_3
+	/*gd25q16c_cs_pin 	= gpio_pin_3*/
+	gd25q16c_cs_pin 	= gpio_pin_7
 };
 
 enum {

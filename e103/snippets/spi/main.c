@@ -19,8 +19,10 @@ int main(void)
 	gd25q16c_read_status(&status);
 	xusart_put_char(&usart0, status);
 
+#if 0 
 	gd25q16c_read_id(&id);
 	xusart_put_uint32(&usart0, id);
+#endif
 
 	while(1) {
 	}

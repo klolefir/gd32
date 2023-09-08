@@ -12,6 +12,7 @@ enum {
 void xsystick_init(const uint32_t freq);
 void xsystick_set_freq(const uint32_t freq);
 void xsystick_delay_ms(const uint32_t ms);
+void xsystick_delay_us(const uint32_t us);
 void xsystick_enable();
 void xsystick_disable();
 void xsystick_reset();

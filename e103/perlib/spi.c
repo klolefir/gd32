@@ -10,7 +10,6 @@ static int8_t xspi_switch_irq_prior(spi_t *spi_set);
 static void xspi_set_bidir_receive(spi_t *spi_set);
 static void xspi_set_bidir_transmit(spi_t *spi_set);
 
-
 void xspi_init(spi_t *spi_set)
 {
 	spi_parameter_struct params;
@@ -76,8 +75,8 @@ void xspi_recv_byte(spi_t *spi_set, uint8_t *byte)
 	case spi_trans_mode_bdtransmit:		xspi_set_bidir_receive(spi_set);
 										break;
 	case spi_trans_mode_bdreceive:
-	case spi_trans_mode_fullduplex:		break;
 	case spi_trans_mode_receiveonly:
+	case spi_trans_mode_fullduplex:		break;
 	default:							return;
 	}
 
