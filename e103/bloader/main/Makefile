@@ -33,6 +33,7 @@ VENDOR_SRC 	= 	$(GD32LIB_PATH)/src/gd32e10x_rcu.c \
 				$(GD32LIB_PATH)/src/gd32e10x_fmc.c \
 				$(GD32LIB_PATH)/src/gd32e10x_usart.c \
 				$(GD32LIB_PATH)/src/gd32e10x_timer.c \
+				$(GD32LIB_PATH)/src/gd32e10x_dma.c \
 				$(GD32LIB_PATH)/src/gd32e10x_adc.c
 PERLIB_SRC = 	$(PERLIB_PATH)/usart.c \
 				$(PERLIB_PATH)/gpio.c \
@@ -41,6 +42,7 @@ PERLIB_SRC = 	$(PERLIB_PATH)/usart.c \
 				$(PERLIB_PATH)/tim_hd.c \
 				$(PERLIB_PATH)/fmc.c \
 				$(PERLIB_PATH)/adc.c \
+				$(PERLIB_PATH)/dma.c \
 				$(PERLIB_PATH)/systick.c
 KELIB_SRC 	= 	$(KELIB_PATH)/kestring.c
 
