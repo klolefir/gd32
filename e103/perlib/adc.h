@@ -12,7 +12,8 @@ enum {
 	adc_regular_channel = ADC_REGULAR_CHANNEL,
 	adc_scan_mode = ADC_SCAN_MODE,
 	adc_cont_mode = ADC_CONTINUOUS_MODE,
-	adc_rcu_div = RCU_CKADC_CKAPB2_DIV4
+	adc_rcu_div = RCU_CKADC_CKAPB2_DIV4,
+	adc_conv_flag = ADC_FLAG_EOC	
 };
 
 typedef enum {
@@ -46,6 +47,7 @@ typedef enum {
 	adc_ch15	= ADC_CHANNEL_15,
 	adc_ch16	= ADC_CHANNEL_16,
 	adc_ch17	= ADC_CHANNEL_17,
+	adc_chmax	= 18,
 	adc_temp	= adc_ch16,
 	adc_vref	= adc_ch17
 } adc_ch_t;
@@ -115,6 +117,11 @@ typedef struct {
 	adc_group_len_t 	len;
 } adc_group_t;
 
+typedef enum {
+	adc_conv_rdy = SET,
+	adc_conv_nrdy = RESET
+} adc_conv_status_t;
+
 typedef struct {
 	adc_num_t 				adc;
 	adc_mode_t 				mode;
@@ -131,7 +138,10 @@ void xadc_init(adc_t *adc_set);
 void xadc_enable(adc_t *adc_set);
 void xadc_disable(adc_t *adc_set);
 
-uint16_t xadc_get_data(adc_t *adc_set);
+uint16_t xadc_conversion(adc_t *adc_set, adc_ch_t ch);
+uint32_t *xadc_dma_conversion(adc_t *adc_set);
+
+/*uint16_t xadc_get_data(adc_t *adc_set);*/
 
 void xadc_enable_scan_mode(adc_t *adc_set);
 void xadc_disable_scan_mode(adc_t *adc_set);
@@ -141,12 +151,14 @@ void xadc_disable_cont_mode(adc_t *adc_set);
 
 void xadc_enable_soft_trig(adc_t *adc_set);
 
-void xadc_set_group(adc_t *adc_set, adc_group_t *group);
+void xadc_set_group(adc_t *adc_set);
 
 void xadc_calib(adc_t *adc_set);
 
 void xadc_sensor_enable();
 void xadc_sensor_disable();
+
+void xadc_set_ch(adc_t *adc_set, adc_ch_t ch);
 
 #if 0
 void xadc_sensor_enable();

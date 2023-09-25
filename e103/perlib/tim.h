@@ -5,7 +5,7 @@
 
 typedef enum {
 	tim_num_5 = TIMER5,
-	tim_num_6 = TIMER6,
+	tim_num_6 = TIMER6, /* hold timer */
 	tim_num_7 = TIMER7
 } tim_num_t;
 
@@ -13,6 +13,10 @@ enum {
 	tim5_irq_prior = 0,
 	tim6_irq_prior = 0,
 	tim7_irq_prior = 0
+};
+
+enum {
+	tim_rcu_bus = CK_APB1
 };
 
 enum {
@@ -62,5 +66,8 @@ void xtim_enable_irq(tim_t *tim_set);
 void xtim_disable_irq(tim_t *tim_set);
 uint32_t xtim_get_ticks(const tim_t *tim_set);
 void xtim_set_ticks(const tim_t *tim_set, const uint32_t ticks);
+void xtim_hold_init();
+void xtim_delay_ms(const uint32_t ms);
+void xtim_delay_us(const uint16_t us);
 
 #endif

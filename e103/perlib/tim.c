@@ -25,6 +25,53 @@ void xtim_init(const tim_t *tim_set)
 	timer_enable(tim);
 }
 
+void xtim_hold_init()
+{
+	timer_parameter_struct params;
+	uint32_t freq = rcu_clock_freq_get(tim_rcu_bus) * 2;
+	uint32_t psc = freq / 1000;
+	uint32_t per = 1;
+	tim_num_t tim 			= tim_num_6;
+	params.prescaler 		= psc;
+	params.period 			= per;
+	params.alignedmode 		= tim_align_edge;
+	params.counterdirection = tim_counter_dir_up;
+	params.clockdivision 	= tim_clkdiv_1;
+	params.repetitioncounter = 1;
+
+	rcu_periph_clock_enable(RCU_TIMER6);
+	nvic_irq_enable(tim6_irqn, tim6_irq_prior, tim6_irq_prior);
+	timer_interrupt_enable(tim, tim_overflow_irq);
+	timer_init(tim, &params);
+	timer_update_event_enable(tim);
+	timer_enable(tim);
+}
+
+void xtim_delay_ms(const uint32_t ms)
+{
+	uint32_t time = 0;
+	tim6_set_ticks(time);
+	while(time != ms) {
+		time = tim6_get_ticks();
+	}
+#if 0
+	uint32_t time = ms;
+	while(time) {
+		xtim_delay_us(1000);
+		time--;
+	}
+#endif
+}
+
+void xtim_delay_us(const uint16_t us)
+{
+	uint32_t time = 0;
+	tim6_set_ticks(time);
+	while(time != us) {
+		time = tim6_get_ticks();
+	}
+}
+
 void xtim_rcu_init(const tim_t *tim_set)
 {
 	tim_num_t tim = tim_set->tim;

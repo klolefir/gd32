@@ -10,6 +10,8 @@ static int8_t xspi_switch_irq_prior(spi_t *spi_set);
 static void xspi_set_bidir_receive(spi_t *spi_set);
 static void xspi_set_bidir_transmit(spi_t *spi_set);
 
+static gpio_t mosi_pin, miso_pin, sck_pin, nss_pin;
+
 void xspi_init(spi_t *spi_set)
 {
 	spi_parameter_struct params;
@@ -84,7 +86,15 @@ void xspi_recv_byte(spi_t *spi_set, uint8_t *byte)
 		recv_status = xspi_get_recv_status(spi_set);
 	} while(recv_status == spi_recv_nrdy);
 
+	if(spi_set->trans_mode == spi_trans_mode_bdreceive)
+		xgpio_set_mode(&mosi_pin, gpio_mode_in_float);
+
 	*byte = spi_i2s_data_receive(spi);
+
+	if(spi_set->trans_mode == spi_trans_mode_bdreceive) {
+		xspi_set_bidir_transmit(spi_set);
+		xgpio_set_mode(&mosi_pin, gpio_mode_af_pp);
+	}
 }
 
 void xspi_sendrecv_byte(spi_t *spi_set, uint8_t *byte)
@@ -117,16 +127,16 @@ spi_recv_status_t xspi_get_recv_status(spi_t *spi_set)
 
 void xspi_gpio_init(spi_t *spi_set)
 {
-	gpio_t mosi_pin, miso_pin, sck_pin, nss_pin;
 	gpio_port_t mosi_port, miso_port, sck_port, nss_port;
 	gpio_pin_t mosi_pin_num, miso_pin_num, sck_pin_num, nss_pin_num;
 
 	spi_num_t spi = spi_set->spi;
+	spi_trans_mode_t trans_mode = spi_set->trans_mode;
 
 	mosi_pin.mode 	= gpio_mode_af_pp;
 	mosi_pin.speed 	= gpio_ospeed_50mhz;
 	miso_pin.mode 	= gpio_mode_in_float;
-	miso_pin.speed 	= gpio_ospeed_50mhz;
+	miso_pin.speed 	= gpio_ospeed_max;
 	sck_pin.mode 	= gpio_mode_af_pp;
 	sck_pin.speed 	= gpio_ospeed_50mhz;
 
@@ -171,8 +181,11 @@ void xspi_gpio_init(spi_t *spi_set)
 	nss_pin.pin 	= nss_pin_num;
 
 	xgpio_init(&mosi_pin);
-	xgpio_init(&miso_pin);
 	xgpio_init(&sck_pin);
+
+	if((trans_mode != spi_trans_mode_bdreceive) && (trans_mode != spi_trans_mode_bdtransmit))
+		xgpio_init(&miso_pin);
+
 	if(spi_set->nss == spi_nss_hard)
 		xgpio_init(&nss_pin);
 }

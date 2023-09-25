@@ -27,6 +27,16 @@ void xgpio_clr(gpio_t *gpio_set)
 	gpio_bit_reset(port, pin);
 }
 
+void xgpio_set_mode(gpio_t *gpio_set, gpio_mode_t mode)
+{
+	gpio_port_t 	port 	= gpio_set->port;
+	gpio_pin_t 		pin 	= gpio_set->pin;
+	gpio_ospeed_t 	speed 	= gpio_set->speed;
+	gpio_set->mode = mode;
+
+	gpio_init(port, mode, speed, pin);
+}
+
 void xgpio_tgl(gpio_t *gpio_set)
 {
 	uint8_t data;

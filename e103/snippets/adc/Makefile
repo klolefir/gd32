@@ -23,12 +23,17 @@ CMSIS_SOURCE = 	../../vendor/cmsis/gd32e10x/per/src/gd32e10x_rcu.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_fmc.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_usart.c \
 				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_dac.c \
-				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_adc.c
+				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_adc.c \
+				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_timer.c \
+				 ../../vendor/cmsis/gd32e10x/per/src/gd32e10x_dma.c
 PERLIB_SOURCE = ../../perlib/gpio.c \
 				../../perlib/systick.c \
 				../../perlib/usart.c \
 				../../perlib/dac.c \
-				../../perlib/adc.c
+				../../perlib/adc.c \
+				../../perlib/tim.c \
+				../../perlib/tim_hd.c \
+				../../perlib/dma.c
 KELIB_SOURCE = ../../kelib/kestring.c
 
 SOURCES = $(MAIN_SOURCE) $(SYSTEM_SOURCE) $(STARTUP_SOURCE) $(CMSIS_SOURCE) $(PERLIB_SOURCE) $(KELIB_SOURCE)

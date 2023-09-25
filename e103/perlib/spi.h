@@ -122,6 +122,7 @@ typedef struct {
 	spi_trans_mode_t		trans_mode;
 	spi_frame_size_t		frame_size;
 	spi_nss_t				nss;
+	gpio_t 					*cs_grp;
 	spi_endian_t			endian;
 	spi_polarity_t			polarity;
 	spi_phase_t				phase;

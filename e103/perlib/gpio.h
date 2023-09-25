@@ -59,5 +59,6 @@ void xgpio_init(gpio_t *pin);
 void xgpio_set(gpio_t *pin);
 void xgpio_clr(gpio_t *pin);
 void xgpio_tgl(gpio_t *pin);
+void xgpio_set_mode(gpio_t *pin, gpio_mode_t mode);
 
 #endif
