@@ -38,7 +38,8 @@ typedef enum {
 /* baudrate */
 typedef enum {
 	usart_baud_9600 	= 9600,
-	usart_baud_115200 	= 115200
+	usart_baud_115200 	= 115200,
+	usart_baud_921600 	= 921600
 } usart_baud_t;
 
 /* parity */

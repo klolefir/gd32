@@ -7,7 +7,7 @@ PERLIB_PATH = $(GD32_PATH)/perlib
 KELIB_PATH = $(GD32_PATH)/kelib
 VENDOR_PATH = $(GD32_PATH)/vendor/cmsis
 GD32LIB_PATH = $(VENDOR_PATH)/gd32e10x/per
-OPTIMIZATION = -O0
+OPTIMIZATION = -Os
 
 CFLAGS = -Wall -g -mcpu=cortex-m4 -mthumb -mfloat-abi=hard $(OPTIMIZATION)
 

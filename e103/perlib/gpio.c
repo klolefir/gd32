@@ -5,47 +5,42 @@ static void xgpio_rcu_init(gpio_t *gpio_set);
 void xgpio_init(gpio_t *gpio_set)
 {
 	xgpio_rcu_init(gpio_set);
-	gpio_port_t 	port 	= gpio_set->port;
-	gpio_pin_t 		pin 	= gpio_set->pin;
-	gpio_mode_t 	mode 	= gpio_set->mode;
-	gpio_ospeed_t 	speed 	= gpio_set->speed;
-
-	gpio_init(port, mode, speed, pin);
+	gpio_init(gpio_set->port, gpio_set->mode, gpio_set->speed, gpio_set->pin);
 }
 
 void xgpio_set(gpio_t *gpio_set)
 {
-	gpio_port_t port = gpio_set->port;
-	gpio_pin_t pin = gpio_set->pin;
-	gpio_bit_set(port, pin);
+	gpio_bit_set(gpio_set->port, gpio_set->pin);
 }
 
 void xgpio_clr(gpio_t *gpio_set)
 {
-	gpio_port_t port = gpio_set->port;
-	gpio_pin_t pin = gpio_set->pin;
-	gpio_bit_reset(port, pin);
+	gpio_bit_reset(gpio_set->port, gpio_set->pin);
 }
 
 void xgpio_set_mode(gpio_t *gpio_set, gpio_mode_t mode)
 {
-	gpio_port_t 	port 	= gpio_set->port;
-	gpio_pin_t 		pin 	= gpio_set->pin;
-	gpio_ospeed_t 	speed 	= gpio_set->speed;
 	gpio_set->mode = mode;
-
-	gpio_init(port, mode, speed, pin);
+	gpio_init(gpio_set->port, gpio_set->mode, gpio_set->speed, gpio_set->pin);
 }
 
 void xgpio_tgl(gpio_t *gpio_set)
 {
 	uint8_t data;
-	gpio_port_t port = gpio_set->port;
-	gpio_pin_t pin = gpio_set->pin;
-	FlagStatus status = gpio_output_bit_get(port, pin);
-
+	FlagStatus status = gpio_output_bit_get(gpio_set->port, gpio_set->pin);
 	data = (status == SET) ? 0 : 1;
-	gpio_bit_write(port, pin, data);
+	gpio_bit_write(gpio_set->port, gpio_set->pin, data);
+}
+
+void xgpio_sw(gpio_t *gpio_set, gpio_state_t state)
+{
+	switch(state) {
+	case gpio_state_on:		xgpio_set(gpio_set);
+							break;
+
+	case gpio_state_off:	xgpio_clr(gpio_set);
+							break;
+	}
 }
 
 void xgpio_rcu_init(gpio_t *gpio_set)

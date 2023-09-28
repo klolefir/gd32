@@ -4,15 +4,21 @@
 #include <gd32e10x.h>
 
 typedef enum {
+	tim_num_1 = TIMER1,
+	tim_num_4 = TIMER4,
 	tim_num_5 = TIMER5,
 	tim_num_6 = TIMER6, /* hold timer */
-	tim_num_7 = TIMER7
+	tim_num_7 = TIMER7,
+	tim_num_8 = TIMER8
 } tim_num_t;
 
 enum {
+	tim1_irq_prior = 0,
+	tim4_irq_prior = 0,
 	tim5_irq_prior = 0,
 	tim6_irq_prior = 0,
-	tim7_irq_prior = 0
+	tim7_irq_prior = 0,
+	tim8_irq_prior = 0
 };
 
 enum {

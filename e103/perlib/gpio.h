@@ -22,6 +22,7 @@ typedef enum {
 	gpio_mode_af_pp	 		= GPIO_MODE_AF_PP
 } gpio_mode_t;
 
+
 typedef enum {
 	gpio_pin_0 	= GPIO_PIN_0,
 	gpio_pin_1 	= GPIO_PIN_1,
@@ -48,6 +49,11 @@ typedef enum {
 	gpio_ospeed_max 	= GPIO_OSPEED_MAX
 } gpio_ospeed_t;
 
+typedef enum {
+	gpio_state_on,
+	gpio_state_off
+} gpio_state_t;
+
 typedef struct {
 	gpio_port_t 	port;
 	gpio_pin_t 		pin;
@@ -56,6 +62,7 @@ typedef struct {
 } gpio_t;
 
 void xgpio_init(gpio_t *pin);
+void xgpio_sw(gpio_t *pin, gpio_state_t state);
 void xgpio_set(gpio_t *pin);
 void xgpio_clr(gpio_t *pin);
 void xgpio_tgl(gpio_t *pin);
