@@ -7,7 +7,7 @@ PERLIB_PATH = $(GD32_PATH)/perlib
 KELIB_PATH = $(GD32_PATH)/kelib
 VENDOR_PATH = $(GD32_PATH)/vendor/cmsis
 GD32LIB_PATH = $(VENDOR_PATH)/gd32e10x/per
-OPTIMIZATION = -O0
+OPTIMIZATION = -Os
 
 CFLAGS = -Wall -g -mcpu=cortex-m4 -mthumb -mfloat-abi=hard $(OPTIMIZATION)
 
@@ -21,13 +21,13 @@ KELIB_INC 	= 	-I $(KELIB_PATH)
 
 CPPFLAGS = 	$(MACRO) $(MAIN_INC) $(VENDOR_INC) $(PERLIB_INC) $(KELIB_INC)
 
-#LINKER_FILE = $(GD32_PATH)/bloader/general/link_main.ld 
-LINKER_FILE = $(GD32_PATH)/bloader/general/link.ld 
+LINKER_FILE = $(GD32_PATH)/bloader/general/link_main.ld 
+#LINKER_FILE = $(GD32_PATH)/bloader/general/link.ld 
 LDFLAGS = -Wall -g -nostdlib -T $(LINKER_FILE)
 
 MAIN_SRC 	=	./main.c
-#SYSTEM_SRC 	= 	$(VENDOR_PATH)/gd32e10x/src/system_gd32e10x_main.c
-SYSTEM_SRC 	= 	$(VENDOR_PATH)/gd32e10x/src/system_gd32e10x.c
+SYSTEM_SRC 	= 	$(VENDOR_PATH)/gd32e10x/src/system_gd32e10x_main.c
+#SYSTEM_SRC 	= 	$(VENDOR_PATH)/gd32e10x/src/system_gd32e10x.c
 STARTUP_SRC = 	$(GD32_PATH)/snippets/general/startup.c
 VENDOR_SRC 	= 	$(GD32LIB_PATH)/src/gd32e10x_rcu.c \
 				$(GD32LIB_PATH)/src/gd32e10x_gpio.c \
