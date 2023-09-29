@@ -116,11 +116,23 @@ void xtim_enable_irq(tim_t *tim_set)
 	xtim_set_ticks(tim_set, 0);
 }
 
+void xtim_tenable_irq(tim_t *tim_set)
+{
+	tim_set->irq_state = tim_irq_on;
+    TIMER_DMAINTEN(tim_set->tim) |= (uint32_t)tim_overflow_irq; 
+}
+
 void xtim_disable_irq(tim_t *tim_set)
 {
 	tim_num_t tim = tim_set->tim;
 	tim_set->irq_state = tim_irq_off;
 	timer_interrupt_disable(tim, tim_overflow_irq); xtim_set_ticks(tim_set, 0);
+}
+
+void xtim_tdisable_irq(tim_t *tim_set)
+{
+	tim_set->irq_state = tim_irq_off;
+    TIMER_DMAINTEN(tim_set->tim) &= (~(uint32_t)tim_overflow_irq); 
 }
 
 uint32_t xtim_get_ticks(const tim_t *tim_set)

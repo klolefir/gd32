@@ -1,12 +1,15 @@
 #include <gd32e10x.h>
 #include "usart.h"
+#include "gpio.h"
 #include "tim.h"
 
 static void init();
-static void tgl(gpio_port_t port, gpio_pin_t pin);
+static void tgl(gpio_t *gpio_set);
 
 gpio_t out, debugpin;
 tim_t tim;
+
+static volatile uint8_t flag = 0;
 
 int main(void)
 {
@@ -14,6 +17,12 @@ int main(void)
 	init();
 	xtim_enable_irq(&tim);
 	while(1) {
+#if 0
+	if(flag == 1) {
+			xgpio_ttgl(&out);
+			flag = 0;
+		}
+#endif
 	}
 
 	return 0;
@@ -50,17 +59,11 @@ void init()
 	xgpio_init(&out);
 }
 
-#if 0 
-void tim1_handler()
-{
-	xgpio_tgl(&out);
-	FlagStatus status = timer_interrupt_flag_get(tim_num_1, tim_overflow_flag);
-	timer_interrupt_flag_clear(tim_num_1, tim_overflow_flag);
-}
-#endif
-
 void tim0_brk_tim8_handler()
 {
+#if 0
+	flag = 1;
+#else
 #if 0
 	FlagStatus status;
     if((uint32_t)RESET !=(GPIO_OCTL(gpio_port_e) & (gpio_pin_9))){
@@ -75,7 +78,17 @@ void tim0_brk_tim8_handler()
         GPIO_BC(gpio_port_e) = (uint32_t)gpio_pin_9;
     }
 #else
-	xgpio_tgl(&out);
+	xgpio_ttgl(&out);
+#endif
 #endif
     TIMER_INTF(tim.tim) = (~(uint32_t)TIMER_INT_FLAG_UP);
+}
+
+void tgl(gpio_t *gpio_set)
+{
+    if((GPIO_OCTL(gpio_set->port) & (gpio_set->pin)) != (uint32_t)RESET) {
+        GPIO_BC(gpio_set->port) = (uint32_t)gpio_set->pin;
+    } else {
+        GPIO_BOP(gpio_set->port) = (uint32_t)gpio_set->pin;
+    }
 }

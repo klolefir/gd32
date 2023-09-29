@@ -69,7 +69,9 @@ void xtim_enable(tim_t *tim_setup);
 void xtim_disable(tim_t *tim_setup);
 #endif
 void xtim_enable_irq(tim_t *tim_set);
+void xtim_tenable_irq(tim_t *tim_set);
 void xtim_disable_irq(tim_t *tim_set);
+void xtim_tdisable_irq(tim_t *tim_set);
 uint32_t xtim_get_ticks(const tim_t *tim_set);
 void xtim_set_ticks(const tim_t *tim_set, const uint32_t ticks);
 void xtim_hold_init();

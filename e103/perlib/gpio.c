@@ -13,9 +13,19 @@ void xgpio_set(gpio_t *gpio_set)
 	gpio_bit_set(gpio_set->port, gpio_set->pin);
 }
 
+void xgpio_tset(gpio_t *gpio_set)
+{
+    GPIO_BOP(gpio_set->port) = (uint32_t)gpio_set->pin;
+}
+
 void xgpio_clr(gpio_t *gpio_set)
 {
 	gpio_bit_reset(gpio_set->port, gpio_set->pin);
+}
+
+void xgpio_tclr(gpio_t *gpio_set)
+{
+    GPIO_BC(gpio_set->port) = (uint32_t)gpio_set->pin;
 }
 
 void xgpio_set_mode(gpio_t *gpio_set, gpio_mode_t mode)
@@ -30,6 +40,15 @@ void xgpio_tgl(gpio_t *gpio_set)
 	FlagStatus status = gpio_output_bit_get(gpio_set->port, gpio_set->pin);
 	data = (status == SET) ? 0 : 1;
 	gpio_bit_write(gpio_set->port, gpio_set->pin, data);
+}
+
+void xgpio_ttgl(gpio_t *gpio_set)
+{
+	uint32_t status = (GPIO_OCTL(gpio_set->port) & (gpio_set->pin));
+    if(status)
+        GPIO_BC(gpio_set->port) = (uint32_t)gpio_set->pin;
+    else
+        GPIO_BOP(gpio_set->port) = (uint32_t)gpio_set->pin;
 }
 
 void xgpio_sw(gpio_t *gpio_set, gpio_state_t state)
