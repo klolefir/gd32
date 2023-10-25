@@ -62,6 +62,17 @@ void xgpio_sw(gpio_t *gpio_set, gpio_state_t state)
 	}
 }
 
+void xgpio_tsw(gpio_t *gpio_set, gpio_state_t state)
+{
+	switch(state) {
+	case gpio_state_on:		xgpio_tset(gpio_set);
+							break;
+
+	case gpio_state_off:	xgpio_tclr(gpio_set);
+							break;
+	}
+}
+
 void xgpio_rcu_init(gpio_t *gpio_set)
 {
 	switch(gpio_set->port) {

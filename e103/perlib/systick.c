@@ -13,28 +13,6 @@ void xsystick_init(const uint32_t freq)
 	xsystick_enable();
 }
 
-void xsystick_delay_us(const uint32_t us)
-{
-	uint32_t time;
-	xsystick_set_ticks(us);
-	while(time) {
-		time = xsystick_get_ticks();
-	}
-}
-
-void xsystick_delay_ms(const uint32_t ms)
-{
-#if 1
-	uint32_t time = ms;
-	while(time) {
-		xsystick_delay_us(1000);
-		time--;
-	}
-#else
-	xsystick_set_ticks
-#endif
-}
-#if 0
 void xsystick_delay_ms(const uint32_t ms)
 {
 	uint32_t start = ticks;
@@ -45,7 +23,6 @@ void xsystick_delay_ms(const uint32_t ms)
 
 	while(ticks < end) {}
 }
-#endif
 
 uint32_t xsystick_get_ticks()
 {

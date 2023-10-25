@@ -2,7 +2,8 @@ ELF2BIN = arm-none-eabi-objcopy
 CC = arm-none-eabi-gcc
 
 USR = $(USER)
-PRJ_PATH = /home/$(USR)/projects/gd32/e103/bloader/bloader
+PRJ_PATH = $(PWD)
+RTOS_PATH = /home/$(USER)/projects/os/freertos/FreeRTOS
 FIRMWARE_PATH = $(PRJ_PATH)/bin
 GD32_PATH = /home/$(USR)/projects/gd32/e103
 PERLIB_PATH = $(GD32_PATH)/perlib
@@ -11,30 +12,36 @@ VENDOR_PATH = $(GD32_PATH)/vendor/cmsis
 GD32LIB_PATH = $(VENDOR_PATH)/gd32e10x/per
 OPTIMIZATION = -Os
 
-CFLAGS = -Wall -g -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -fstack-usage $(OPTIMIZATION)
+CFLAGS = -Wall -g -mcpu=cortex-m4 -mthumb -mfloat-abi=hard --specs=nano.specs $(OPTIMIZATION)
 
 MACRO = -D GD32E103V_EVAL
-MAIN_INC 	=	-I $(PRJ_PATH)/inc
+MAIN_INC 	=	-I $(PRJ_PATH)
 VENDOR_INC 	= 	-I $(VENDOR_PATH)/gd32e10x/inc \
 				-I $(GD32LIB_PATH)/inc \
 				-I $(VENDOR_PATH)
 PERLIB_INC 	= 	-I $(PERLIB_PATH)
 KELIB_INC 	= 	-I $(KELIB_PATH)
+RTOS_INC	=	-I $(RTOS_PATH)/Source/include \
+				-I $(RTOS_PATH)/Source/portable/GCC/ARM_CM4F
 INC = $(MAIN_INC) \
 	  $(VENDOR_INC) \
 	  $(PERLIB_INC) \
-	  $(KELIB_INC)
+	  $(KELIB_INC) \
+	  $(RTOS_INC)
 
 CPPFLAGS = 	$(MACRO) \
 			$(INC)
 
 LINKER_FILE = $(GD32_PATH)/bloader/general/link_bloader.ld 
-LDFLAGS = -Wall -g -nostdlib -T $(LINKER_FILE)
+LDFLAGS = -Wall -g -T $(LINKER_FILE)
 
-MAIN_SRC 	=	$(PRJ_PATH)/src/main.c 		\
-				$(PRJ_PATH)/src/fsm.c 		\
-				$(PRJ_PATH)/src/bloader.c 	\
-				$(PRJ_PATH)/src/operator.c
+MAIN_SRC 	=	$(PRJ_PATH)/main.c
+RTOS_SRC 	=	$(PRJ_PATH)/tasks.c \
+				$(PRJ_PATH)/queue.c \
+				$(PRJ_PATH)/list.c \
+				$(PRJ_PATH)/port.c \
+				$(PRJ_PATH)/heap_2.c
+	
 SYSTEM_SRC 	= 	$(VENDOR_PATH)/gd32e10x/src/system_gd32e10x.c
 STARTUP_SRC = 	$(GD32_PATH)/snippets/general/startup.c
 VENDOR_SRC 	= 	$(GD32LIB_PATH)/src/gd32e10x_rcu.c 		\
@@ -54,10 +61,11 @@ KELIB_SRC 	= 	$(KELIB_PATH)/kestring.c
 
 SRC = 	$(MAIN_SRC) 	\
 		$(SYSTEM_SRC) 	\
-		$(STARTUP_SRC) 	\
-		$(VENDOR_SRC) 	\
-		$(PERLIB_SRC) 	\
-		$(KELIB_SRC)
+		$(STARTUP_SRC)	\
+		$(RTOS_SRC)	 	\
+		$(VENDOR_SRC) 
+		#$(PERLIB_SRC) 	\
+		#$(KELIB_SRC)
 
 ELF = $(FIRMWARE_PATH)/firmware.elf
 BIN = $(FIRMWARE_PATH)/firmware.bin

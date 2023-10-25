@@ -4,7 +4,7 @@ static uint32_t xfmc_switch_page_addr(const uint32_t addr);
 
 fmc_status_t xfmc_write_sector(uint32_t *addr, const uint32_t *data, uint32_t *size /* bytes */)
 {
-	uint32_t i, curr_addr;
+	uint32_t i, curr_addr = 0;
 	fmc_status_t status;
 
 	if(*size > fmc_max_write_size)
@@ -24,7 +24,7 @@ fmc_status_t xfmc_write_sector(uint32_t *addr, const uint32_t *data, uint32_t *s
 #if 0
 fmc_status_t xfmc_write_sector(const uint32_t addr, const uint32_t *data, const uint32_t size /* bytes */)
 {
-	uint32_t i, curr_addr;
+	uint32_t i, curr_addr = 0;
 	fmc_status_t status;
 
 	if(size > fmc_max_write_size)
@@ -45,7 +45,7 @@ fmc_status_t xfmc_write_sector(const uint32_t addr, const uint32_t *data, const 
 fmc_status_t xfmc_read_sector(uint32_t *addr, uint32_t *data, uint32_t *size /* bytes*/)
 {
 	uint32_t i;
-	uint32_t curr_addr;
+	uint32_t curr_addr = 0;
 	if(*size > fmc_max_read_size) {
 		*size = 0;
 		return fmc_blen;
@@ -76,7 +76,7 @@ fmc_status_t xfmc_read_sector(const uint32_t addr, uint32_t *data, const uint32_
 fmc_status_t xfmc_erase_sector(uint32_t *addr, uint32_t *size /* bytes */)
 {
 	uint32_t i;
-	uint32_t curr_page_addr;
+	uint32_t curr_page_addr = 0;
 	fmc_status_t status;
 
 	if(*size > fmc_max_erase_size) {

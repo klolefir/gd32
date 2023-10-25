@@ -1,7 +1,7 @@
 #include "dac.h"
 
-static void xdac_gpio_init();
-static void xdac_rcu_init();
+static void xdac_gpio_init(dac_t *dac_set);
+static void xdac_rcu_init(dac_t *dac_set);
 
 void xdac_init(dac_t *dac_set)
 {

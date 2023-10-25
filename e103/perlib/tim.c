@@ -76,18 +76,13 @@ void xtim_rcu_init(const tim_t *tim_set)
 {
 	tim_num_t tim = tim_set->tim;
 	switch(tim) {
-	case tim_num_1:	rcu_periph_clock_enable(RCU_TIMER1);
-					break;
-	case tim_num_4:	rcu_periph_clock_enable(RCU_TIMER4);
-					break;
-	case tim_num_5:	rcu_periph_clock_enable(RCU_TIMER5);
-					break;
-	case tim_num_6:	rcu_periph_clock_enable(RCU_TIMER6);
-					break;
-	case tim_num_7:	rcu_periph_clock_enable(RCU_TIMER7);
-					break;
-	case tim_num_8:	rcu_periph_clock_enable(RCU_TIMER8);
-					break;
+	case tim_num_1:		rcu_periph_clock_enable(RCU_TIMER1); break;
+	case tim_num_4:		rcu_periph_clock_enable(RCU_TIMER4); break;
+	case tim_num_5:		rcu_periph_clock_enable(RCU_TIMER5); break;
+	case tim_num_6:		rcu_periph_clock_enable(RCU_TIMER6); break;
+	case tim_num_7:		rcu_periph_clock_enable(RCU_TIMER7); break;
+	case tim_num_8:		rcu_periph_clock_enable(RCU_TIMER8); break;
+	case tim_num_11:	rcu_periph_clock_enable(RCU_TIMER11); break;
 	}
 }
 
@@ -114,6 +109,11 @@ void xtim_enable_irq(tim_t *tim_set)
 	tim_set->irq_state = tim_irq_on;
 	timer_interrupt_enable(tim, tim_overflow_irq);
 	xtim_set_ticks(tim_set, 0);
+}
+
+void xtim_clear_irq(tim_t *tim_set)
+{
+    TIMER_INTF(tim_set->tim) = ~(uint32_t)TIMER_INT_FLAG_UP;
 }
 
 void xtim_tenable_irq(tim_t *tim_set)
@@ -169,13 +169,14 @@ nvic_irqn_t xtim_switch_irqn(const tim_t *tim_set)
 {
 	tim_num_t tim = tim_set->tim;
 	switch(tim) {
-	case tim_num_1:	return tim1_irqn;
-	case tim_num_4:	return tim4_irqn;
-	case tim_num_5:	return tim5_irqn;
-	case tim_num_6:	return tim6_irqn;
-	case tim_num_7: return tim7_irqn;
-	case tim_num_8:	return tim8_irqn;
-	default:		return nvic_none_irqn;
+	case tim_num_1:		return tim1_irqn;
+	case tim_num_4:		return tim4_irqn;
+	case tim_num_5:		return tim5_irqn;
+	case tim_num_6:		return tim6_irqn;
+	case tim_num_7:		return tim7_irqn;
+	case tim_num_8:		return tim8_irqn;
+	case tim_num_11:	return tim11_irqn;
+	default:			return nvic_none_irqn;
 	}
 }
 
@@ -183,12 +184,13 @@ int8_t xtim_switch_irq_prior(const tim_t *tim_set)
 {
 	tim_num_t tim = tim_set->tim;
 	switch(tim) {
-	case tim_num_1:	return tim1_irq_prior;
-	case tim_num_4:	return tim4_irq_prior;
-	case tim_num_5:	return tim5_irq_prior;
-	case tim_num_6:	return tim6_irq_prior;
-	case tim_num_7: return tim7_irq_prior;
-	case tim_num_8: return tim8_irq_prior;
+	case tim_num_1:		return tim1_irq_prior;
+	case tim_num_4:		return tim4_irq_prior;
+	case tim_num_5:		return tim5_irq_prior;
+	case tim_num_6:		return tim6_irq_prior;
+	case tim_num_7:		return tim7_irq_prior;
+	case tim_num_8:		return tim8_irq_prior;
+	case tim_num_11: 	return tim11_irq_prior;
 	default:		return nvic_none_irq_prior;
 	}
 }

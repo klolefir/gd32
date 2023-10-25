@@ -112,12 +112,7 @@ void xusart_put_uint32(usart_t *usart_set, const uint32_t data)
 {
 	char data_str[6];
 	kememcpy(data_str, &data, sizeof(uint32_t));
-#if 0
-	data_str[4] = '\r';
-	data_str[5] = '\0';
-#else
 	data_str[4] = '\0';
-#endif
 	xusart_put_str(usart_set, data_str);
 }
 

@@ -9,7 +9,8 @@ typedef enum {
 	tim_num_5 = TIMER5,
 	tim_num_6 = TIMER6, /* hold timer */
 	tim_num_7 = TIMER7,
-	tim_num_8 = TIMER8
+	tim_num_8 = TIMER8,
+	tim_num_11 = TIMER11,
 } tim_num_t;
 
 enum {
@@ -18,7 +19,8 @@ enum {
 	tim5_irq_prior = 0,
 	tim6_irq_prior = 0,
 	tim7_irq_prior = 0,
-	tim8_irq_prior = 0
+	tim8_irq_prior = 0,
+	tim11_irq_prior = 0
 };
 
 enum {
@@ -68,6 +70,7 @@ void xtim_init(const tim_t *tim_set);
 void xtim_enable(tim_t *tim_setup);
 void xtim_disable(tim_t *tim_setup);
 #endif
+void xtim_clear_irq(tim_t *tim_set);
 void xtim_enable_irq(tim_t *tim_set);
 void xtim_tenable_irq(tim_t *tim_set);
 void xtim_disable_irq(tim_t *tim_set);

@@ -33,7 +33,7 @@ void xadc_init(adc_t *adc_set)
 	adc_external_trigger_config(adc, adc_regular_channel, ENABLE);
 }
 
-static void xadc_dma_init(adc_t *adc_set)
+void xadc_dma_init(adc_t *adc_set)
 {
 	dma_t dma;
 	dma.dma = dma_num_0;
@@ -181,7 +181,7 @@ void xadc_set_ch(adc_t *adc_set, adc_ch_t ch)
 	adc_regular_channel_config(adc_set->adc, 0, ch, adc_sampletime_239point5);
 }
 
-static adc_conv_status_t xadc_get_conv_status(adc_t *adc_set)
+adc_conv_status_t xadc_get_conv_status(adc_t *adc_set)
 {
 	adc_conv_status_t status = adc_flag_get(adc_set->adc, adc_conv_flag);
 	return status;

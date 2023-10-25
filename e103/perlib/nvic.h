@@ -24,12 +24,14 @@ typedef enum {
 	tim6_irqn			= TIMER6_IRQn,
 	tim7_irqn			= TIMER7_UP_TIMER12_IRQn,
 	tim8_irqn			= TIMER0_BRK_TIMER8_IRQn,
+	tim11_irqn			= TIMER7_BRK_TIMER11_IRQn,
 	usart0_irqn			= USART0_IRQn,
 	usart1_irqn			= USART1_IRQn,
 	usart2_irqn			= USART2_IRQn,
 	spi0_irqn		  	= SPI0_IRQn,
 	spi1_irqn		  	= SPI1_IRQn,
-	spi2_irqn		  	= SPI2_IRQn
+	spi2_irqn		  	= SPI2_IRQn,
+	exti5_9_irqn		= EXTI5_9_IRQn
 } nvic_irqn_t;
 
 #if 0 

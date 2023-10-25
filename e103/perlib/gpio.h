@@ -63,6 +63,7 @@ typedef struct {
 
 void xgpio_init(gpio_t *pin);
 void xgpio_sw(gpio_t *pin, gpio_state_t state);
+void xgpio_tsw(gpio_t *gpio_set, gpio_state_t state);
 void xgpio_set(gpio_t *pin);
 void xgpio_tset(gpio_t *pin);
 void xgpio_clr(gpio_t *pin);

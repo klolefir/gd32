@@ -6,7 +6,7 @@
 #include "kestring.h"
 #include "operator.h"
 
-static void init();
+static void init(void);
 static recv_state_t receive(buff_t *buff_set);
 static decode_state_t decode(const buff_t *buff_set, bl_packet_t *packet);
 static check_state_t check(bl_packet_t *packet);
@@ -14,9 +14,9 @@ static handle_state_t handle(bl_packet_t *packet);
 static void code(buff_t *buff_set, bl_packet_t *packet);
 static void respond(const buff_t *buff_set);
 static void purge(buff_t *buff_set);
-static void reset();
-static void deinit();
-static void gomain();
+static void reset(void);
+static void deinit(void);
+static void gomain(void);
 
 static fsm_state_t switch_state_after_recv(const recv_state_t recv_status);
 static fsm_state_t switch_state_after_decode(const decode_state_t decode_state);
@@ -106,44 +106,12 @@ void init()
 	SystemInit();
 	SystemCoreClockUpdate();
 	operator_init();
-#if 0
-	init_operator();
-	init_operator_timer();
-#endif
 }
 
 recv_state_t receive(buff_t *buff_set)
 {
 	recv_state_t recv_state = operator_receive(buff_set);
 	return recv_state;
-#if 0
-	recv_state_t recv_state = recv_state_bad;
-
-	uint32_t *req_cnt = &(buff_set->cnt);
-	buff_size_t *req_buff = (buff_set->buff);
-
-	static uint32_t timer = 0;
-	uint32_t usart_ticks = xtim_get_ticks(&usart_tim);
-	char c;
-
-	usart_rx_status_t rx_status = xusart_get_rx_status(&usart0);
-	if(rx_status == usart_rx_rdy) {
-		/*xgpio_tgl(&debug_led);*/
-		xusart_get_char(&usart0, &c);
-		req_buff[*req_cnt] = c;
-		(*req_cnt)++;
-		timer = usart_ticks + 2; /* delay ms */
-	}
-
-	if(((timer) && (usart_ticks >= timer) && (*req_cnt)) ||
-		(*req_cnt >= req_buff_len))
-	{
-		recv_state = recv_state_ok;
-		timer = 0;
-	}
-
-	return recv_state;
-#endif
 }
 
 decode_state_t decode(const buff_t *buff_set, bl_packet_t *packet)
@@ -151,6 +119,7 @@ decode_state_t decode(const buff_t *buff_set, bl_packet_t *packet)
 	const uint32_t *req_cnt = &(buff_set->cnt);
 	const buff_size_t *req_buff = (buff_set->buff);
 	uint16_t sig_in;
+	/* add crc check! */
 	/*uint32_t crc, crc_len;*/
 
 	if(!(*req_cnt))
@@ -267,13 +236,6 @@ void code(buff_t *buff_set, bl_packet_t *packet)
 void respond(const buff_t *buff_set)
 {
 	operator_transmit(buff_set);
-#if 0
-	const uint32_t ans_cnt = buff_set->cnt;
-	const buff_size_t *ans_buff = (buff_set->buff);
-	
-	if(ans_cnt)
-		xusart_put_buff(&usart0, ans_buff, ans_cnt);
-#endif
 }
 
 void purge(buff_t *buff_set)
